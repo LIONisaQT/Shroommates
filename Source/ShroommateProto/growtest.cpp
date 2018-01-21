@@ -28,6 +28,14 @@ AGrowtest::AGrowtest()
 	Hitbox->OnComponentEndOverlap.AddDynamic(this, &AGrowtest::onPlayerExit);
 	Hitbox->SetupAttachment(RootComponent);
 
+	renderBox = CreateDefaultSubobject<UBoxComponent>(TEXT("renderbox"));
+	renderBox->SetWorldScale3D(FVector(50.f, 50.f, 50.f));
+	renderBox->bGenerateOverlapEvents = true;
+	renderBox->OnComponentBeginOverlap.AddDynamic(this, &AGrowtest::onPlayerInRange);
+	renderBox->OnComponentEndOverlap.AddDynamic(this, &AGrowtest::onPlayerOutRange);
+	renderBox->SetupAttachment(RootComponent);
+
+
 }
 
 // Called when the game starts or when spawned
@@ -75,6 +83,13 @@ void AGrowtest::Tick(float DeltaTime)
 		respawn = 0.f;
 	}
 
+	if (inRenderRange) {
+		GrowMesh->SetRenderCustomDepth(true);
+	}
+	else {
+
+		GrowMesh->SetRenderCustomDepth(false);
+	}
 }
 
 void AGrowtest::onPlayerEnter(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -90,6 +105,20 @@ void AGrowtest::onPlayerExit(UPrimitiveComponent * OverlappedComp, AActor * Othe
 {
 	if (OtherActor->GetName() == "Character") {
 		inConsumeRange = 0;
+	}
+}
+
+void AGrowtest::onPlayerInRange(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	if (OtherActor->GetName() == "Character") {
+		inRenderRange = 1;
+	}
+}
+
+void AGrowtest::onPlayerOutRange(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor->GetName() == "Character") {
+		inRenderRange = 0;
 	}
 }
 

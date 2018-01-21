@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "MySaveGame.h"
+
 
 #define print(text) if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 1.5, FColor::Blue,text)
 
@@ -62,10 +64,7 @@ AShroommateProtoCharacter::AShroommateProtoCharacter()
 	justJumped = false;
 	wallRate = 0.05f;
 	timeSinceWallJump = 40.0f;
-	skillpoints = 3;
-	agility1 = false;
-	agility2 = false;
-	agility3 = false;
+	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,9 +74,12 @@ void AShroommateProtoCharacter::SetupPlayerInputComponent(class UInputComponent*
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
+
+	PlayerInputComponent->BindAction("Save", IE_Pressed, this, &AShroommateProtoCharacter::SaveGame);
+	PlayerInputComponent->BindAction("Load", IE_Pressed, this, &AShroommateProtoCharacter::LoadGame);
+
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AShroommateProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AShroommateProtoCharacter::MoveRight);
@@ -104,7 +106,6 @@ void AShroommateProtoCharacter::SetupPlayerInputComponent(class UInputComponent*
 
 
 }
-
 
 
 void AShroommateProtoCharacter::OnResetVR()
@@ -217,8 +218,28 @@ void AShroommateProtoCharacter::Tick(float DeltaTime)
 	else {
 		justJumped = false;
 	}
+}
 
+void AShroommateProtoCharacter::SaveGame()
+{
+	//instance of the savegame class
+	UMySaveGame* SaveGameInstance = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
+	//Set the save game instance location equal to the players current location
+	SaveGameInstance->PlayerLocation = this->GetActorLocation();
+	//Save the savegameinstance
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("MySlot"), 0);
+	//debug
+	//GEngine->AddOnScreenDebugMessage(-1, 5f, FColor:Red, TEXT("Game Saved"));
+}
 
-
-
+void AShroommateProtoCharacter::LoadGame()
+{
+	//instance of the savegame class
+	UMySaveGame* SaveGameInstance = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
+	//Load the saved game into our savegameinstance variable
+	SaveGameInstance = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot("MySlot", 0));
+	//set the players position from the saved game file
+	this->SetActorLocation(SaveGameInstance->PlayerLocation);
+	//debug
+	//GEngine->AddOnScreenDebugMessage(-1, 5f, FColor:Red, TEXT("Game Loaded"));
 }

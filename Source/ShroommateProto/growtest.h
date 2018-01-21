@@ -18,6 +18,9 @@ class SHROOMMATEPROTO_API AGrowtest : public AActor
 	//set pickup hitbox
 	UPROPERTY(EditAnywhere)
 		class UShapeComponent* Hitbox;
+	//set render box 
+	UPROPERTY(EditAnywhere)
+		class UShapeComponent* renderBox;
 
 	UPROPERTY(Category = Qualities, EditAnywhere)
 		float change; //AG 10/15/17: How much it affects the attribute 
@@ -40,7 +43,8 @@ public:
 	float respawn = 0.f;
 	UPROPERTY(Category = Gameplay, EditAnywhere)
 		float respawnTime = 60.f;
-
+	//boolean for custom render pass
+	bool inRenderRange = 0;
 	//set mesh component
 
 
@@ -57,6 +61,11 @@ public:
 	UFUNCTION()
 		void onPlayerExit(UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION()
+		void onPlayerInRange(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		void onPlayerOutRange(UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 };
 
